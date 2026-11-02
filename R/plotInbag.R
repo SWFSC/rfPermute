@@ -24,8 +24,6 @@
 #' library(randomForest)
 #' data(mtcars)
 #' 
-#' sampsize = c(5, 5)
-#' 
 #' rf <- randomForest(factor(am) ~ ., data = mtcars, ntree = 10)
 #' plotInbag(rf)
 #' 
@@ -34,6 +32,9 @@
 #' 
 #' rf <- randomForest(factor(am) ~ ., data = mtcars, ntree = 10000)
 #' plotInbag(rf)
+#' 
+#' rf <- randomForest(factor(am) ~ ., data = mtcars, ntree = 10000, sampsize = c(5, 5))
+#' plotInbag(rf, sampsize = c(5, 5))
 #' 
 #' @export
 #'
@@ -49,37 +50,84 @@ plotInbag <- function(x, bins = 10, replace = TRUE, sampsize = NULL,
     }
   }
   
-  n <- length(rf$y)
-  if(is.null(sampsize)) sampsize <- if(replace) n else ceiling(0.632 * n)
+  # number of individuals
+  k <- length(rf$y)
+  # number of individuals per class
+  n <- table(rf$y)
+  # check sampsize
+  if(is.null(sampsize)) sampsize <- if(replace) k else ceiling(0.632 * k)
   
-  .pctPicked <- function(m) {
-    pct <- 1 - (1 - (1 / m)) ^ m
-    sapply(pct, function(p) if(is.nan(p)) 1 - (1 / exp(1)) else p)
-  }
-  
+  # compute expected percent
   exp.pct <- if(replace) {
     if(length(sampsize) == 1) {
-      .pctPicked(sampsize) * 100
+      pct <- 1 - (1 - (1 / sampsize)) ^ sampsize
+      if(is.nan(pct)) pct <- 1 - (1 / exp(1))
+      pct * 100
     } else {
-      (as.vector((.pctPicked(sampsize) * sampsize)) / table(rf$y)) * 100
+      as.vector((1 - ((n - 1) / n) ^ sampsize)) * 100
     }
   } else if(length(sampsize) == 1) {
-    (sampsize / n) * 100
+    (sampsize / k) * 100
   } else {
-    as.vector(sampsize / table(rf$y)) * 100
+    as.vector(sampsize / n) * 100
   }
   
-  pct <- ((rf$ntree - rf$oob.times) / rf$ntree) * 100
-  bins <- max(bins, floor(length(pct) / 5))
-  p <- data.frame(pct = pct) |> 
-    ggplot2::ggplot(ggplot2::aes_string("pct")) +
+  # convert expected percent to data frame
+  exp.pct <- if(rf$type == "classification") {
+    data.frame(group = levels(rf$y), exp.pct = exp.pct) 
+  } else {
+    data.frame(group = 1, exp.pct = exp.pct)
+  }
+  
+  # observed percent inbag
+  obs.pct <- data.frame(
+    group = rf$y,
+    pct = ((rf$ntree - rf$oob.times) / rf$ntree) * 100
+  )
+  
+  # create histograms
+  p <- obs.pct |> 
+    ggplot2::ggplot(ggplot2::aes(x = .data$pct)) +
     ggplot2::geom_histogram(bins = bins) +
     ggplot2::labs(
       x = "Percent of trees where sample was inbag",
       y = "Frequency"
     ) + 
-    ggplot2::geom_vline(xintercept = exp.pct, color = "red")
+    ggplot2::geom_vline(
+      ggplot2::aes(xintercept = exp.pct), 
+      data = exp.pct, 
+      color = "red"
+    )
+  if(length(sampsize) > 1) p <- p + ggplot2::facet_wrap(~.data$group, scales = 'free')
   
+  # plot histograms
   if(plot) print(p)
-  invisible(p)
+  
+  # summarize inbag rates
+  smry.vals <- c('mean', 'median', 'mode', 'min', 'max', 'sd', 'ci.lower', 'ci.upper')
+  inbag.smry <- suppressWarnings(if(length(sampsize) == 1) {
+    c(
+      expected = exp.pct$exp.pct[1],
+      swfscMisc::distSmry(obs.pct$pct, method = 'venter')[smry.vals] 
+    ) 
+  } else {
+    smry <- do.call(
+      rbind,
+      tapply(
+        obs.pct$pct, 
+        obs.pct$group, 
+        swfscMisc::distSmry, 
+        method = 'venter'
+      )
+    ) |> 
+      t()
+    rbind(
+      expected = tibble::deframe(exp.pct), smry[smry.vals, ])
+  })
+  
+  # show summary
+  message('Percent inbag summary:')
+  print(inbag.smry)
+  
+  invisible(list(plot = p, smry = inbag.smry))
 }

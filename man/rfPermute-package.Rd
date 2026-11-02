@@ -10,13 +10,18 @@ Random Forest Predictor Importance Significance and Model Diagnostics.
 \seealso{
 Useful links:
 \itemize{
-  \item \url{https://github.com/EricArcher/rfPermute}
-  \item Report bugs at \url{https://github.com/EricArcher/rfPermute/issues}
+  \item \url{https://github.com/SWFSC/rfPermute}
+  \item Report bugs at \url{https://github.com/SWFSC/rfPermute/issues}
 }
 
 }
 \author{
-\strong{Maintainer}: Eric Archer \email{eric.archer@noaa.gov}
+\strong{Maintainer}: Eric Archer \email{eric.ivan.archer@gmail.com}
+
+Authors:
+\itemize{
+  \item Eric Archer \email{eric.ivan.archer@gmail.com}
+}
 
 }
 \keyword{internal}

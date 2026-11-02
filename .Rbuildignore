@@ -11,3 +11,5 @@ tar.gz$
 ^\.github$
 .DS_Store
 ^revdep$
+^CRAN-SUBMISSION$
+^cran-comments\.md$

@@ -137,12 +137,12 @@ plotImportance <- function(x, plot.type = c("bar", "heatmap"), imp.type = NULL,
         pval = if(inherits(x, "rfPermute")) {
           x$pval[rownames(imp.mat), i, sc]
         } else Inf
-      ) %>% 
-        tibble::rownames_to_column("pred") %>% 
+      ) |> 
+        tibble::rownames_to_column("pred") |> 
         dplyr::mutate(
           is.sig = .data$pval <= alpha,
           pred = stats::reorder(.data$pred, .data$imp)
-        ) %>% 
+        ) |> 
         dplyr::arrange(-.data$imp)
       if(sig.only) imp.df <- imp.df[imp.df$is.sig, ]
       n <- min(n, nrow(imp.df))
@@ -151,7 +151,7 @@ plotImportance <- function(x, plot.type = c("bar", "heatmap"), imp.type = NULL,
       
       ggplot2::ggplot(
         imp.df, 
-        ggplot2::aes_string(x = "pred", y = "imp", fill = "is.sig") 
+        ggplot2::aes(x = .data$pred, y = .data$imp, fill = .data$is.sig) 
       ) + 
         ggplot2::geom_bar(stat = "identity") +
         ggplot2::coord_flip() + 
@@ -174,17 +174,17 @@ plotImportance <- function(x, plot.type = c("bar", "heatmap"), imp.type = NULL,
     preds <- rev(rev(preds)[1:n])
     imp.df <- data.frame(imp.mat[preds, imp.type, drop = FALSE], check.names = FALSE)
     if(ranks) for(i in imp.type) imp.df[[i]] <- rank(-imp.df[[i]])
-    imp.df <- imp.df %>% 
-      tibble::rownames_to_column("pred") %>% 
-      tidyr::pivot_longer(-.data$pred, names_to = "type") %>% 
+    imp.df <- imp.df |> 
+      tibble::rownames_to_column("pred") |> 
+      tidyr::pivot_longer(-.data$pred, names_to = "type") |> 
       dplyr::mutate(
         type = factor(.data$type, levels = imp.type),
         pred = factor(.data$pred, levels = preds)
       )
     
     # create plot
-    g <- ggplot2::ggplot(imp.df, ggplot2::aes_string("type", "pred")) +
-      ggplot2::geom_raster(ggplot2::aes_string(fill = "value")) + 
+    g <- ggplot2::ggplot(imp.df, ggplot2::aes(x = .data$type, y = .data$pred)) +
+      ggplot2::geom_raster(ggplot2::aes(fill = .data$value)) + 
       ggplot2::theme(panel.background = ggplot2::element_blank())
     g <- g + if(ranks) {
       ggplot2::scale_fill_gradient2(

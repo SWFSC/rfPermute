@@ -27,10 +27,14 @@ export(plotTrace)
 export(plotVotes)
 export(rfPermute)
 export(rfPermuteTutorial)
-importFrom(magrittr,"%>%")
+export(rfROC)
 importFrom(methods,new)
-importFrom(randomForest,importance)
-importFrom(randomForest,randomForest)
+importFrom(randomForest,
+  importance,
+  randomForest
+)
 importFrom(rlang,.data)
-importFrom(stats,na.fail)
-importFrom(stats,predict)
+importFrom(stats,
+  na.fail,
+  predict
+)

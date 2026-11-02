@@ -72,6 +72,7 @@ confusionMatrix <- function(x, conf.level = 0.95, threshold = NULL) {
   cm <- rbind(cm, Overall = rep(NA, ncol(cm)))
   pct.correct <- (correct.n / all.n) * 100
   cbind(
+    n = all.n,
     cm, 
     pct.correct = pct.correct[rownames(cm)], 
     ci[rownames(cm), , drop = FALSE],
@@ -88,8 +89,8 @@ plotConfMat <- function(x, title = NULL, plot = TRUE) {
   if(rf$type == "regression") stop("'rf' must be of a classification model")
   
   conf <- .confMat(rf)
-  pct.correct <- (100 * sum(diag(conf)) / sum(conf)) %>% 
-    round(0) %>% 
+  pct.correct <- (100 * sum(diag(conf)) / sum(conf)) |> 
+    round(0) |> 
     paste0("% correct")
   title <- if(is.null(title)) {
     pct.correct 
@@ -99,18 +100,18 @@ plotConfMat <- function(x, title = NULL, plot = TRUE) {
   freq <- rowSums(conf)
   rownames(conf) <- paste0(names(freq), " (", freq, ")")
   
-  p <- conf %>% 
-    prop.table(1) %>% 
-    as.data.frame %>% 
-    tibble::rownames_to_column("observed") %>% 
-    tidyr::gather("predicted", "prop", -.data$observed) %>% 
+  p <- conf |> 
+    prop.table(1) |> 
+    as.data.frame() |> 
+    tibble::rownames_to_column("observed") |> 
+    tidyr::gather("predicted", "prop", -.data$observed) |> 
     dplyr::mutate(
       observed = factor(.data$observed),
       observed = stats::reorder(.data$observed, dplyr::desc(.data$observed)),
       predicted = factor(.data$predicted)
-    ) %>% 
-    ggplot2::ggplot(ggplot2::aes_string("predicted", "observed")) +
-    ggplot2::geom_raster(ggplot2::aes_string(fill = "prop")) +
+    ) |> 
+    ggplot2::ggplot(ggplot2::aes(x = .data$predicted, y = .data$observed)) +
+    ggplot2::geom_raster(ggplot2::aes(fill = .data$prop)) +
     ggplot2::scale_fill_viridis_c(
       option = "magma", 
       direction = -1, 
@@ -121,7 +122,8 @@ plotConfMat <- function(x, title = NULL, plot = TRUE) {
     ggplot2::guides(fill = ggplot2::guide_colorbar(title = "Proportion")) +
     ggplot2::theme(
       axis.text.x.top = ggplot2::element_text(angle = 45, hjust = 0),
-      panel.background = ggplot2::element_blank()
+      panel.background = ggplot2::element_blank(),
+      legend.key.height = ggplot2::unit(1, 'null')
     )
   
   if(plot) print(p)

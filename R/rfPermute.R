@@ -98,6 +98,9 @@ rfPermute.default <- function(x, y = NULL, ..., num.rep = 100, num.cores = 1) {
   ran.y <- lapply(1:num.rep, function(i) sample(rf.call$y))
   call.x <- x
   
+  # Set arguments in randomForest call not needed in permutations
+  rf.call[c('proximity', 'do.trace', 'keep.forest', 'keep.inbag')]  <- FALSE
+  
   # Get importance scores for permutations
   #  a list of 3-dimensional arrays of importance scores
   max.cores <- parallel::detectCores() - 1
@@ -270,7 +273,6 @@ predict.rfPermute <- function(object, ...) predict(as.randomForest(object), ...)
 
 
 #' @rdname rfPermute
-#' @importFrom stats predict
 #' @export
 #' 
 rfPermuteTutorial <- function() {

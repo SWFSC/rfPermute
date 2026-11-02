@@ -37,8 +37,6 @@ Red vertical lines on the plot denote the expected inbag rate(s).
 library(randomForest)
 data(mtcars)
 
-sampsize = c(5, 5)
-
 rf <- randomForest(factor(am) ~ ., data = mtcars, ntree = 10)
 plotInbag(rf)
 
@@ -47,6 +45,9 @@ plotInbag(rf)
 
 rf <- randomForest(factor(am) ~ ., data = mtcars, ntree = 10000)
 plotInbag(rf)
+
+rf <- randomForest(factor(am) ~ ., data = mtcars, ntree = 10000, sampsize = c(5, 5))
+plotInbag(rf, sampsize = c(5, 5))
 
 }
 \author{

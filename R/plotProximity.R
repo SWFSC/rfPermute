@@ -77,7 +77,7 @@ plotProximity <- function(x, dim.x = 1, dim.y = 2, class.cols = NULL,
   mds.df <- data.frame(prox.mds, class = rf$y, predicted = rf$predicted)
   colnames(mds.df)[1:2] <- c("x", "y")
   
-  g <- ggplot2::ggplot(mds.df, ggplot2::aes_(~x, ~y, color = ~class)) 
+  g <- ggplot2::ggplot(mds.df, ggplot2::aes(.data$x, .data$y, color = .data$class)) 
   
   # Origin axes
   g <- g + 
@@ -93,7 +93,7 @@ plotProximity <- function(x, dim.x = 1, dim.y = 2, class.cols = NULL,
       group.type, 
       ellipse = {
         g <- g + ggplot2::stat_ellipse(
-          ggplot2::aes_(fill = ~class), 
+          ggplot2::aes(fill = .data$class), 
           geom = "polygon",
           alpha = group.alpha,
           level = ellipse.level,
@@ -105,7 +105,7 @@ plotProximity <- function(x, dim.x = 1, dim.y = 2, class.cols = NULL,
           cl.df <- mds.df[mds.df$class == cl, ]
           i <- grDevices::chull(cl.df$x, cl.df$y)
           g <- g + ggplot2::geom_polygon(
-            ggplot2::aes_(fill = ~class), 
+            ggplot2::aes(fill = .data$class), 
             data = cl.df[c(i, i[1]), ], 
             alpha = group.alpha,
             show.legend = legend.type == "legend"
@@ -133,7 +133,7 @@ plotProximity <- function(x, dim.x = 1, dim.y = 2, class.cols = NULL,
   # Predicted circles
   if(!is.null(circle.size)) {
     g <- g + ggplot2::geom_point(
-      ggplot2::aes_(color = ~predicted), 
+      ggplot2::aes(color = .data$predicted), 
       shape = 21, 
       size = circle.size,
       stroke = circle.border,
@@ -152,13 +152,13 @@ plotProximity <- function(x, dim.x = 1, dim.y = 2, class.cols = NULL,
   # Class labels
   if(legend.type == "label") {
     g <- g + ggplot2::geom_label(
-      ggplot2::aes_(label = ~class), 
-      data = mds.df %>% 
-        dplyr::group_by(.data$class) %>% 
+      ggplot2::aes(label = .data$class), 
+      data = mds.df |> 
+        dplyr::group_by(.data$class) |> 
         dplyr::summarize(
           x = mean(.data$x),
           y = mean(.data$y)
-        ) %>% 
+        ) |> 
         dplyr::ungroup(),
       fill = "white",
       alpha = label.alpha,

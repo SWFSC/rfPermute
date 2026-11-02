@@ -25,16 +25,16 @@ plotPredictedProbs <- function(x, bins = 30, plot = TRUE) {
   rf <- as.randomForest(x)
   if(rf$type == "regression") stop("'rf' must be of a classification model")
   
-  p <- rf$votes %>% 
-    as.data.frame %>% 
+  p <- rf$votes |> 
+    as.data.frame() |> 
     cbind(
       class = as.character(rf$y),
       predicted = as.character(rf$predicted)
-    ) %>% 
-    tidyr::gather("pred.class", "prob", -.data$class, -.data$predicted) %>% 
-    dplyr::filter(.data$predicted == .data$pred.class) %>% 
-    dplyr::mutate(correct = .data$class == .data$predicted) %>% 
-    ggplot2::ggplot(ggplot2::aes_string("prob", fill = "class")) +
+    ) |> 
+    tidyr::gather("pred.class", "prob", -.data$class, -.data$predicted) |> 
+    dplyr::filter(.data$predicted == .data$pred.class) |> 
+    dplyr::mutate(correct = .data$class == .data$predicted) |> 
+    ggplot2::ggplot(ggplot2::aes(.data$prob, fill = .data$class)) +
     ggplot2::geom_histogram(bins = bins) +
     ggplot2::facet_wrap(~ predicted) +
     ggplot2::labs(x = "Assignment probability", y = "Frequency") +

@@ -51,6 +51,7 @@ devtools::install_github('EricArcher/rfPermute')
 * `plotProximity` Plot Random Forest Proximity Scores   
 * `plotTrace` Trace of cumulative error rates in forest  
 * `plotVotes` Vote Distribution    
+* `rfROC` Receiver Operator Curve
  
 ### Miscellaneous functions
 * `combineRP` Combine rfPermute models  
@@ -59,7 +60,19 @@ devtools::install_github('EricArcher/rfPermute')
 
 ## Changelog
 
-### version 2.5.4 (on CRAN)
+### version 2.5.6 (on CRAN)
+
+* switched aes_string() and aes_() for aes() in ggplot plots
+* added rfROC()
+* fixed sampsize bug in plotInbag() when replace = TRUE
+* changed plotInbag() to plot one panel per class for classification models when sampsize is specified by class
+* updated null distribution `randomForest()` calls to explicitly set `proximity`, `do.trace`, `keep.forest`, and `keep.inbag` arguments to `FALSE` to save memory space in each replicate.
+
+### version 2.5.5
+
+* move of package to SWFSC/rfPermute as main GitHub repository
+
+### version 2.5.4
 
 * fixed print.rfPermute output for regression models.  
 

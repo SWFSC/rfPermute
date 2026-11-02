@@ -28,15 +28,17 @@ plotTrace <- function(x, pct.correct = TRUE, plot = TRUE) {
     names(class.cols) <- names(class.lines) <- c("OOB", levels(rf$y))
     
     df <- as.data.frame(rf$err.rate)
-    df %>% 
-      dplyr::mutate(trees = 1:dplyr::n()) %>% 
-      tidyr::gather("class", "error", -.data$trees) %>% 
+    df |> 
+      dplyr::mutate(trees = 1:dplyr::n()) |> 
+      tidyr::gather("class", "error", -.data$trees) |> 
       dplyr::mutate(
         class = factor(.data$class, levels = colnames(df)),
         error = if(pct.correct) (1 - .data$error) * 100 else .data$error * 100
-      ) %>% 
-      ggplot2::ggplot(ggplot2::aes_string("trees", "error", color = "class")) +
-      ggplot2::geom_line(ggplot2::aes_string(linetype = "class")) +
+      ) |> 
+      ggplot2::ggplot(
+        ggplot2::aes(x = .data$trees, y = .data$error, color = .data$class)
+      ) +
+      ggplot2::geom_line(ggplot2::aes(linetype = .data$class)) +
       ggplot2::scale_color_manual(values = class.cols) +
       ggplot2::scale_linetype_manual(values = class.lines) +
       ggplot2::labs(
@@ -45,8 +47,8 @@ plotTrace <- function(x, pct.correct = TRUE, plot = TRUE) {
       ) +
       ggplot2::theme(legend.title = ggplot2::element_blank())
   } else if(utils::hasName(rf, "mse")) {
-    data.frame(trees = 1:length(rf$mse), error = rf$mse) %>% 
-      ggplot2::ggplot(ggplot2::aes_string("trees", "error")) +
+    data.frame(trees = 1:length(rf$mse), error = rf$mse) |> 
+      ggplot2::ggplot(ggplot2::aes(x = .data$trees, y = .data$error)) +
       ggplot2::geom_line() +
       ggplot2::labs(x = "Trees", y = "Mean Squared Error")
   } else NULL

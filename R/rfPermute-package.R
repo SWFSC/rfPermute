@@ -8,7 +8,6 @@
 #' 
 #' @importFrom randomForest randomForest
 #' @importFrom rlang .data
-#' @importFrom magrittr %>%
 #' @importFrom methods new
 #' 
 .onAttach <- function(libname, pkgname) {
